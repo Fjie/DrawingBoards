@@ -40,7 +40,10 @@ public class Line implements DrawingView {
         } else {
             paint.setColor(Color.RED);
         }
-
+        float px = startX + (stopX-startX)/2;
+        float py = startY + (stopY-startY)/2;
+        paint.setTextSize(200);
+        canvas.drawText(lengthLabel+"",px,py,paint);
         canvas.drawLine(startX, startY, stopX, stopY, this.paint);
     }
 
@@ -79,6 +82,7 @@ public class Line implements DrawingView {
     private void fun2(float weight) {
 
         double v = Math.atan((stopX - startX) / (stopY - startY));
+        v = Math.abs(v);//取消掉斜率代表的方向，在下方手动判断
         Log.d("XXX", "v = " + v);
         float ac = lengthLabel / weight;
         Log.d("XXX", "ac = " + ac);
@@ -86,7 +90,7 @@ public class Line implements DrawingView {
         Log.d("XXX", "bc = " + bc);
         float ab = (float) (ac * Math.cos(v));
         Log.d("XXX", "ab = " + ab);
-
+//        手动判断方向
         stopX = stopX > startX ? startX + bc : startX - bc;
         stopY = stopY > startY ? startY + ab : startY - ab;
 
