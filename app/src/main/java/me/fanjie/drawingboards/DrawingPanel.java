@@ -1,16 +1,21 @@
 package me.fanjie.drawingboards;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +31,8 @@ public class DrawingPanel extends View {
     private Line selectedLine;
     private Canvas cacheCanvas;
     private Bitmap bitmap;
+    private Float weight;
+
 
     public DrawingPanel(Context context) {
         this(context, null);
@@ -82,9 +89,11 @@ public class DrawingPanel extends View {
         float y = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
+                Log.d("XXX","weight = "+weight);
                 selectedLine = selectedLine(x, y);
                 if (selectedLine == null) {
                     line = new Line(paint);
+                    line.setCallback(callback);
                     line.setStartXY(x, y);
                 } else {
                     invalidate();
@@ -121,5 +130,37 @@ public class DrawingPanel extends View {
             }
         }
         return null;
+    }
+
+    private Line.OnClickCallback callback = new Line.OnClickCallback() {
+        @Override
+        public void onLineClick(Line.HolderPoint point) {
+            if(selectedLine!=null&&point == Line.HolderPoint.LINE){
+                inputLength();
+            }
+        }
+    };
+
+    private void inputLength() {
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_input_length,null);
+        final EditText etInput = (EditText) view.findViewById(R.id.et_input_length);
+        new AlertDialog.Builder(getContext())
+                .setView(view)
+                .setTitle("设置长度")
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String s = etInput.getText().toString();
+                        if(!TextUtils.isEmpty(s)){
+                            int length = Integer.parseInt(s);
+                            selectedLine.setLengthLabel(length,weight);
+                            if(weight == null){
+                                weight = length/selectedLine.getLength();
+                            }
+                            invalidate();
+                        }
+                    }
+                })
+                .show();
     }
 }
